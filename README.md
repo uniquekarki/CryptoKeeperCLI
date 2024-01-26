@@ -10,3 +10,7 @@ Empower your security journey with CryptoKeeperCLI, a Python-based password mana
 - **User-Friendly CLI:** Intuitive command-line interface for seamless password management.
 - **Automatic Change Reminders:** Set timely reminders for password updates to enhance security.
 - **Root User Protection:** Ensure the security of your master credentials with robust encryption.
+
+## License
+
+The source code for generation of the blog is under [MIT License](./LICENSE). Content is copyrighted.
