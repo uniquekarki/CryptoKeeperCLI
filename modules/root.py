@@ -1,7 +1,8 @@
+import time
 import sqlite3
 import os
+import getpass
 import base64
-import time
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
@@ -33,7 +34,7 @@ def create_root_user():
         print("CREATE NEW ROOT USER:")
         print("===================================================\n")
         root_username = input("Enter unique username: ")
-        root_password = input("Create a strong password: ")
+        root_password = getpass.getpass("Create a strong password: ")
 
         curr = conn.cursor()
         

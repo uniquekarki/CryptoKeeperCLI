@@ -1,9 +1,10 @@
-import os
-import sqlite3
 import time
+import sqlite3
+import os
 import getpass
-from modules.db import create_root_user_table
 from modules.root import create_root_user, encrypt_password
+from modules.db import create_root_user_table
+from modules.session import store_session_token, remove_session_info
 
 def create_tables():
     conn = sqlite3.connect('database.db')
@@ -16,7 +17,6 @@ def create_tables():
 
 def get_login():
     time.sleep(2)
-    flag = True
     while True:
         os.system('clear')
         command = input("Press 'L' to login, 'C' to create a new user, 'X' to exit: ").lower()
@@ -42,8 +42,9 @@ def get_login():
                     time.sleep(2)
                 else:
                     print("LOGIN SUCCESSFUL!\n")
+                    store_session_token(root_user[0])
                     time.sleep(2)
-                    break
+                    main()
         elif command == 'c':
             time.sleep(2)
             create_root_user()
@@ -52,8 +53,6 @@ def get_login():
             flag = False
             time.sleep(2)
             break
-    return flag
-
             
            
 def main():
@@ -72,12 +71,12 @@ def main():
         print("  change    : Change the root password")
         print("  delete    : Delete the stored password")
         print("  list      : List all stored passwords")
-        print("  exit      : Exit the program")
-        print("  root      : Add Root User")
+        print("  logout    : Logout")
         print("===================================================")
         user_option = input("\nEnter your option: ").strip().lower()
         print(f"option selected: {user_option}")
-        if user_option == "exit":
+        if user_option == "logout":
+            remove_session_info()
             break
         elif user_option == "add":
             pass
@@ -91,13 +90,7 @@ def main():
             pass
         elif user_option == "list":
             pass
-        elif user_option == "root":
-            time.sleep(2)
-            create_root_user()
-
 
 if __name__ == '__main__':
     create_tables()
-    flag = get_login()
-    if flag:
-        main()
+    get_login()
