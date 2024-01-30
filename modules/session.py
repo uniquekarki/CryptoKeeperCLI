@@ -28,7 +28,6 @@ def check_session_validity():
 def remove_session_info():
     try:
         os.remove(SESSION_FILE)
-        print("Logout Successful.")
         time.sleep(2)
     except FileNotFoundError:
         print("No active session to logout from.")
