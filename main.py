@@ -3,7 +3,7 @@ import sqlite3
 import os
 import getpass
 from modules.root import create_root_user, encrypt_password
-from modules.db import create_root_user_table
+from modules.db import create_root_user_table, create_password_store_table
 from modules.session import store_session_token, remove_session_info
 
 def create_tables():
@@ -11,6 +11,7 @@ def create_tables():
     cursor = conn.cursor()
 
     cursor.execute(create_root_user_table())
+    cursor.execute(create_password_store_table())
 
     conn.commit()
     conn.close()
@@ -56,8 +57,6 @@ def get_login():
             
            
 def main():
-    
-    
 
     while True:
         time.sleep(2)
@@ -93,4 +92,5 @@ def main():
 
 if __name__ == '__main__':
     create_tables()
+    remove_session_info()
     get_login()
