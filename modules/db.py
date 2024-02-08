@@ -15,6 +15,7 @@ def create_password_store_table():
             account_name TEXT,
             username TEXT,
             password TEXT,
+            pin INTEGER,
             salt TEXT,
             FOREIGN KEY (user_id) REFERENCES root_user (id)
         )
