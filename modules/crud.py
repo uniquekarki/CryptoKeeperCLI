@@ -5,6 +5,8 @@ import os
 import time
 import getpass
 from modules.password import create_key_salt
+from prettytable import from_db_cursor
+import json
 
 def add_password():
     conn = sqlite3.connect('database.db')
@@ -29,6 +31,10 @@ def add_password():
             time.sleep(2)
             break
         else:
+            f = open('session_config.json')
+            data = json.load(f)
+            user_id = data.get('user_id')
+
             username_dict = create_key_salt(username)
             password_dict = create_key_salt(password)
             if pin:
@@ -49,12 +55,39 @@ def add_password():
             # Dynamically construct the SQL query and parameters based on the optional fields
             query = f"""
                     INSERT INTO passwords 
-                    (account_name, username, password, username_salt, password_salt {''.join([f',{field}' for field in optional_fields])}) 
-                    VALUES (?, ?, ?, ?, ? {''.join([', ?' for _ in optional_fields])})
+                    (account_name, username, password, username_salt, password_salt, user_id {''.join([f',{field}' for field in optional_fields])}) 
+                    VALUES (?, ?, ?, ?, ?, ? {''.join([', ?' for _ in optional_fields])})
                     """
-            params = (account_name, username_key, password_key, username_salt, password_salt)
+            params = (account_name, username_key, password_key, username_salt, password_salt, user_id)
             params += tuple(optional_fields[field] for field in optional_fields)
             curr.execute(query, params)
             conn.commit()
             print("Password Added Successfully!")
             break
+
+def view_one_password():
+
+    conn = sqlite3.connect('database.db')
+    curr = conn.cursor()
+    os.system('clear')
+
+    print("VIEW PASSWORD")
+    print("===================================================\n")
+    f = open('session_config.json')
+    data = json.load(f)
+    user_id = data.get('user_id')
+    while True:
+        account_name = input("Enter the name of the website/account:")
+
+        try:
+            query = f'''
+                    SELECT * FROM passwords WHERE user_id = ? AND account_name = ?
+                    '''
+            curr.execute(query, (user_id, account_name))
+            mytable = from_db_cursor(curr)
+            print(mytable)
+        except:
+            print("No such account in database")
+            time.sleep(2)
+            break
+        
