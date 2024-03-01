@@ -5,8 +5,22 @@ import os
 import time
 import getpass
 from modules.password import create_key_salt
-from prettytable import from_db_cursor
+from prettytable import PrettyTable
 import json
+
+def create_table(fields, values):
+    table = PrettyTable()
+    
+    table.field_names = fields
+
+    for value in values:
+        table.add_row(value)
+    
+    table.align = "l"
+    table.padding_width = 1
+    table.border = True
+
+    return table
 
 def add_password():
     conn = sqlite3.connect('database.db')
@@ -78,15 +92,16 @@ def view_one_password():
     user_id = data.get('user_id')
     while True:
         account_name = input("Enter the name of the website/account:")
-
-        try:
-            query = f'''
-                    SELECT * FROM passwords WHERE user_id = ? AND account_name = ?
-                    '''
-            curr.execute(query, (user_id, account_name))
-            mytable = from_db_cursor(curr)
-            print(mytable)
-        except:
+        query = f'''
+                SELECT id, account_name, username, password FROM passwords WHERE user_id = ? AND account_name = ?
+                '''
+        curr.execute(query, (user_id, account_name))
+        values = curr.fetchone()
+        if values:
+            fields = [description[0] for description in curr.description]
+            table = create_table(fields, [values])
+            print(table)
+        else:
             print("No such account in database")
             time.sleep(2)
             break
