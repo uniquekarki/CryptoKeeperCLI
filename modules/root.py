@@ -2,7 +2,7 @@ import time
 import sqlite3
 import os
 import getpass
-from modules.password import create_key_salt
+from modules.password import encrypt_func
 
 def create_root_user():
     conn = sqlite3.connect('database.db')
@@ -20,11 +20,11 @@ def create_root_user():
         ''').fetchone()
 
         if not if_exists:
-            encrypted_dict = create_key_salt(root_password=root_password)
-            encrypted_password = encrypted_dict['key']
-            salt = encrypted_dict['salt']
-            query = f"INSERT INTO root_user (username, encrypted_password, salt) VALUES (?,?,?);"                
-            curr.execute(query, (root_username, encrypted_password, salt))
+            encrypted_dict = encrypt_func(root_password)
+            encrypted_password = encrypted_dict.get('encrypted_str')
+            key = encrypted_dict.get('key')
+            query = f"INSERT INTO root_user (username, encrypted_password, key) VALUES (?,?,?);"                
+            curr.execute(query, (root_username, encrypted_password, key))
             conn.commit()
             print(f"\nRoot user {root_username} created successfully!")
         else:

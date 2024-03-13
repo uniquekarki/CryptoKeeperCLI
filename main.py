@@ -3,10 +3,10 @@ import sqlite3
 import os
 import getpass
 from modules.root import create_root_user
-from modules.password import encrypt_password
+from modules.password import decrypt_func
 from modules.db import create_root_user_table, create_password_store_table
 from modules.session import store_session_token, remove_session_info
-from modules.crud import add_password, view_one_password
+from modules.crud import add_password, view_one_password, view_all_password
 
 def create_tables():
     conn = sqlite3.connect('database.db')
@@ -39,8 +39,8 @@ def get_login():
                 print("INVALID USERNAME!\n")
                 time.sleep(2)
             else:
-                key = encrypt_password(root_password,root_user[3])
-                if not key == root_user[2]:
+                decrypted_password = decrypt_func(root_user[2],root_user[3])
+                if not root_password == decrypted_password:
                     print("INVALID PASSWORD!\n")
                     time.sleep(2)
                 else:
@@ -66,31 +66,31 @@ def main():
         print("WELCOME TO CRYPTO KEEPER: A Secure Password Manager")
         print("===================================================\n")
         print("Options:")
-        print("  add       : Add a new password")
-        print("  update    : Update an existing password")
-        print("  retrieve  : Retrieve a password")
-        print("  change    : Change the root password")
-        print("  delete    : Delete the stored password")
-        print("  list      : List all stored passwords")
-        print("  logout    : Logout")
+        print("  a    : Add a new password")
+        print("  u    : Update an existing password")
+        print("  r    : Retrieve a password")
+        print("  c    : Change the root password")
+        print("  d    : Delete the stored password")
+        print("  l    : List all stored passwords")
+        print("  e    : Logout")
         print("===================================================")
         user_option = input("\nEnter your option: ").strip().lower()
         print(f"option selected: {user_option}")
-        if user_option == "logout":
+        if user_option == "e":
             remove_session_info()
             break
-        elif user_option == "add":
+        elif user_option == "a":
             add_password()
-        elif user_option == "update":
+        elif user_option == "u":
             pass
-        elif user_option == "retrieve":
+        elif user_option == "r":
             view_one_password()
-        elif user_option == "change":
+        elif user_option == "c":
             pass
-        elif user_option == "delete":
+        elif user_option == "d":
             pass
-        elif user_option == "list":
-            pass
+        elif user_option == "l":
+            view_all_password()
 
 if __name__ == '__main__':
     create_tables()
