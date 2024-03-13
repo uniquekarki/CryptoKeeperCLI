@@ -4,7 +4,7 @@ def create_root_user_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
             encrypted_password TEXT,
-            salt BLOB
+            key BLOB
         )
     ''')
 
@@ -15,10 +15,10 @@ def create_password_store_table():
             account_name TEXT NOT NULL,
             username TEXT NOT NULL,
             password TEXT NOT NULL,
-            pin_key TEXT,
-            username_salt BLOB NOT NULL,
-            password_salt BLOB NOT NULL,
-            pin_salt BLOB,
+            pin TEXT,
+            username_key BLOB NOT NULL,
+            password_key BLOB NOT NULL,
+            pin_key BLOB,
             expiration_date DATE NULL,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES root_user (id)
