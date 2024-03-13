@@ -224,3 +224,28 @@ def update_password():
             curr.execute(query, params)
             conn.commit()
             print("\n\nSucessfully Updated record!")
+
+def delete_password():
+    conn = sqlite3.connect('database.db')
+    curr = conn.cursor()
+    os.system('clear')
+
+    print("DELETE PASSWORD")
+    print("===================================================\n")
+
+    f = open('session_config.json')
+    data = json.load(f)
+    user_id = data.get('user_id')
+    account_name = input("Name of the website/account you want to delete: ")
+    record = curr.execute('SELECT id FROM passwords WHERE user_id = ? AND account_name = ?', (user_id, account_name)).fetchone()
+    
+    if not record:
+        print("No Such Record Found!")
+        return None
+    else:
+        query = '''
+                DELETE FROM passwords WHERE id = ?
+                '''
+        curr.execute(query, (record[0],))
+        conn.commit()
+        print("\nSucessfully Deleted Record!")
