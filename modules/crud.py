@@ -28,57 +28,53 @@ def add_password():
     curr = conn.cursor()
     os.system('clear')
 
-    while True:
-        print("ADD PASSWORD")
-        print("===================================================\n")
+    print("ADD PASSWORD")
+    print("===================================================\n")
 
-        account_name = input("Name of the website/account: ")
-        username = input("Enter username: ")
-        password = getpass.getpass("Enter password: ")
-        verify_password = getpass.getpass("Enter password again: ")
-        pin = getpass.getpass("Enter PIN if relevant: ")
-        expiration_months = input("Enter the number of months for password expiration (press Enter to skip): ")
+    account_name = input("Name of the website/account: ")
+    username = input("Enter username: ")
+    password = getpass.getpass("Enter password: ")
+    verify_password = getpass.getpass("Enter password again: ")
+    pin = getpass.getpass("Enter PIN if relevant: ")
+    expiration_months = input("Enter the number of months for password expiration (press Enter to skip): ")
 
-        optional_fields = {}
+    optional_fields = {}
 
-        if not password == verify_password:
-            print("Password did not match")
-            time.sleep(2)
-            break
-        else:
-            f = open('session_config.json')
-            data = json.load(f)
-            user_id = data.get('user_id')
+    if not password == verify_password:
+        print("Password did not match")
+        time.sleep(2)
+    else:
+        f = open('session_config.json')
+        data = json.load(f)
+        user_id = data.get('user_id')
 
-            username_dict = encrypt_func(username)
-            password_dict = encrypt_func(password)
-            if pin:
-                pin_dict = encrypt_func(pin)
+        username_dict = encrypt_func(username)
+        password_dict = encrypt_func(password)
 
-            username_encrypted, username_key = username_dict.get('encrypted_str'), username_dict.get('key')
-            password_encrypted, password_key = password_dict.get('encrypted_str'), password_dict.get('key')
-            
-            if expiration_months:
-                expiration_date = date.today() + relativedelta(months=+expiration_months)
-                optional_fields['expiration_date'] = expiration_date
-            
-            if pin:
-                pin_encrypted, pin_key = pin_dict.get('encrypted_str'), pin_dict.get('key')
-                optional_fields['pin'] = pin_encrypted
-                optional_fields['pin_key'] = pin_key
+        username_encrypted, username_key = username_dict.get('encrypted_str'), username_dict.get('key')
+        password_encrypted, password_key = password_dict.get('encrypted_str'), password_dict.get('key')
+        
+        if expiration_months:
+            expiration_date = date.today() + relativedelta(months=+expiration_months)
+            optional_fields['expiration_date'] = expiration_date
+        
+        if pin:
+            pin_dict = encrypt_func(pin)
+            pin_encrypted, pin_key = pin_dict.get('encrypted_str'), pin_dict.get('key')
+            optional_fields['pin'] = pin_encrypted
+            optional_fields['pin_key'] = pin_key
 
-            # Dynamically construct the SQL query and parameters based on the optional fields
-            query = f"""
-                    INSERT INTO passwords 
-                    (account_name, username, password, username_key, password_key, user_id {''.join([f',{field}' for field in optional_fields])}) 
-                    VALUES (?, ?, ?, ?, ?, ? {''.join([', ?' for _ in optional_fields])})
-                    """
-            params = (account_name, username_encrypted, password_encrypted, username_key, password_key, user_id)
-            params += tuple(optional_fields[field] for field in optional_fields)
-            curr.execute(query, params)
-            conn.commit()
-            print("Password Added Successfully!")
-            break
+        # Dynamically construct the SQL query and parameters based on the optional fields
+        query = f"""
+                INSERT INTO passwords 
+                (account_name, username, password, username_key, password_key, user_id {''.join([f',{field}' for field in optional_fields])}) 
+                VALUES (?, ?, ?, ?, ?, ? {''.join([', ?' for _ in optional_fields])})
+                """
+        params = (account_name, username_encrypted, password_encrypted, username_key, password_key, user_id)
+        params += tuple(optional_fields[field] for field in optional_fields)
+        curr.execute(query, params)
+        conn.commit()
+        print("Password Added Successfully!")
 
 def view_one_password():
 
@@ -142,3 +138,114 @@ def view_all_password():
     else:
         print("No passwords to list")
         time.sleep(2)
+
+def update_password():
+    conn = sqlite3.connect('database.db')
+    curr = conn.cursor()
+    os.system('clear')
+
+    print("UPDATE PASSWORD")
+    print("===================================================\n")
+
+    f = open('session_config.json')
+    data = json.load(f)
+    user_id = data.get('user_id')
+    optional_fields = {}
+    account_name = input("Name of the website/account you want to update: ")
+    record = curr.execute('SELECT id FROM passwords WHERE user_id = ? AND account_name = ?', (user_id, account_name))
+    
+    if not record.fetchone():
+        print("No Such Record Found!")
+        return None
+    else:            
+        username = input("Enter new username (press Enter to skip): ")
+        if username:
+            verify_username = getpass.getpass("Enter username again: ")
+            if username != verify_username:
+                print("Username did not match")
+                time.sleep(2)
+                return None
+            else:
+                username_dict = encrypt_func(username)
+                username_encrypted, username_key = username_dict.get('encrypted_str'), username_dict.get('key')
+                optional_fields['username'] = username_encrypted
+                optional_fields['username_key'] = username_key
+
+        password = getpass.getpass("Enter new password (press Enter to skip): ")
+        if password:
+            verify_password = getpass.getpass("Enter password again: ")
+            if password != verify_password:
+                print("Password did not match")
+                time.sleep(2)
+                return None
+            else:
+                password_dict = encrypt_func(password)
+                password_encrypted, password_key = password_dict.get('encrypted_str'), password_dict.get('key')
+                optional_fields['password'] = password_encrypted
+                optional_fields['password_key'] = password_key
+        
+        pin = getpass.getpass("Enter new PIN (press Enter to skip): ")
+        if pin:
+            verify_pin = getpass.getpass("Enter password again: ")
+            if pin != verify_pin:
+                print("PIN did not match")
+                time.sleep(2)
+                return None
+            else:
+                pin_dict = encrypt_func(pin)
+                pin_encrypted, pin_key = pin_dict.get('encrypted_str'), pin_dict.get('key')
+                optional_fields['pin'] = pin_encrypted
+                optional_fields['pin_key'] = pin_key
+
+        expiration_months = input("Enter the number of months for password expiration (press Enter to skip): ")
+        if expiration_months:
+            expiration_date = date.today() + relativedelta(months=+expiration_months)
+            optional_fields['expiration_date'] = expiration_date
+
+        if not optional_fields:
+            print("\n\nNo New Update!")
+            return None
+        else:
+            q_str = ''
+            for key,val in optional_fields.items():
+                q_str += str()
+
+            query = f'''
+                    UPDATE
+                        passwords
+                    SET
+                        {' = ?, '.join(key for key in optional_fields.keys())} = ?
+                    WHERE
+                        user_id = ?
+                    AND
+                        account_name = ?
+                    '''
+            params = list(optional_fields.values()) + [user_id, account_name]
+            curr.execute(query, params)
+            conn.commit()
+            print("\n\nSucessfully Updated record!")
+
+def delete_password():
+    conn = sqlite3.connect('database.db')
+    curr = conn.cursor()
+    os.system('clear')
+
+    print("DELETE PASSWORD")
+    print("===================================================\n")
+
+    f = open('session_config.json')
+    data = json.load(f)
+    user_id = data.get('user_id')
+    account_name = input("Name of the website/account you want to delete: ")
+    record = curr.execute('SELECT id FROM passwords WHERE user_id = ? AND account_name = ?', (user_id, account_name)).fetchone()
+    
+    if not record:
+        print("No Such Record Found!")
+        return None
+    else:
+        query = '''
+                DELETE FROM passwords WHERE id = ?
+                '''
+        curr.execute(query, (record[0],))
+        conn.commit()
+        print("\nSucessfully Deleted Record!")

@@ -2,11 +2,11 @@ import time
 import sqlite3
 import os
 import getpass
-from modules.root import create_root_user
+from modules.root import create_root_user, change_root_password
 from modules.password import decrypt_func
 from modules.db import create_root_user_table, create_password_store_table
 from modules.session import store_session_token, remove_session_info
-from modules.crud import add_password, view_one_password, view_all_password
+from modules.crud import add_password, view_one_password, view_all_password, update_password, delete_password
 
 def create_tables():
     conn = sqlite3.connect('database.db')
@@ -72,23 +72,25 @@ def main():
         print("  c    : Change the root password")
         print("  d    : Delete the stored password")
         print("  l    : List all stored passwords")
-        print("  e    : Logout")
+        print("  x    : Logout")
         print("===================================================")
         user_option = input("\nEnter your option: ").strip().lower()
         print(f"option selected: {user_option}")
-        if user_option == "e":
+        if user_option == "x":
             remove_session_info()
             break
         elif user_option == "a":
             add_password()
         elif user_option == "u":
-            pass
+            update_password()
         elif user_option == "r":
             view_one_password()
         elif user_option == "c":
-            pass
+            change_root_password()
+            remove_session_info()
+            break
         elif user_option == "d":
-            pass
+            delete_password()
         elif user_option == "l":
             view_all_password()
 
