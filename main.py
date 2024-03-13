@@ -2,7 +2,7 @@ import time
 import sqlite3
 import os
 import getpass
-from modules.root import create_root_user
+from modules.root import create_root_user, change_root_password
 from modules.password import decrypt_func
 from modules.db import create_root_user_table, create_password_store_table
 from modules.session import store_session_token, remove_session_info
@@ -86,7 +86,9 @@ def main():
         elif user_option == "r":
             view_one_password()
         elif user_option == "c":
-            pass
+            change_root_password()
+            remove_session_info()
+            break
         elif user_option == "d":
             delete_password()
         elif user_option == "l":
