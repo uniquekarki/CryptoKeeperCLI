@@ -6,7 +6,7 @@ from modules.root import create_root_user
 from modules.password import decrypt_func
 from modules.db import create_root_user_table, create_password_store_table
 from modules.session import store_session_token, remove_session_info
-from modules.crud import add_password, view_one_password, view_all_password
+from modules.crud import add_password, view_one_password, view_all_password, update_password
 
 def create_tables():
     conn = sqlite3.connect('database.db')
@@ -82,7 +82,7 @@ def main():
         elif user_option == "a":
             add_password()
         elif user_option == "u":
-            pass
+            update_password()
         elif user_option == "r":
             view_one_password()
         elif user_option == "c":
